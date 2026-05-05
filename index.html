@@ -1,0 +1,308 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Captain">
+<meta name="theme-color" content="#0f0a1e">
+<meta name="description" content="Captain of the Throwers — Workout Tracker">
+<title>Captain of the Throwers</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🏋🏼‍♀️</text></svg>">
+<link rel="apple-touch-icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect fill='%230f0a1e' width='100' height='100' rx='20'/><text x='50' y='65' text-anchor='middle' font-size='55'>🏋🏼‍♀️</text></svg>">
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=Raleway:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #0f0a1e; --bg2: #1a1035; --bg3: #0d1b2a;
+  --text: #e2d9f3; --dim: #6b5f8a; --dimmer: #4a3670;
+  --accent: #fbbf24; --purple: #c4b5fd; --purpleA: rgba(139,92,246,0.08);
+  --border: rgba(139,92,246,0.12); --input-bg: rgba(15,10,30,0.6);
+  --safe-top: env(safe-area-inset-top, 0px);
+  --safe-bottom: env(safe-area-inset-bottom, 0px);
+}
+* { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+html { background: var(--bg); }
+body {
+  min-height: 100vh; min-height: 100dvh;
+  background: linear-gradient(160deg, var(--bg) 0%, var(--bg2) 40%, var(--bg3) 100%);
+  font-family: 'Raleway', sans-serif; color: var(--text);
+  overscroll-behavior: none; -webkit-font-smoothing: antialiased;
+  padding-top: var(--safe-top); padding-bottom: var(--safe-bottom);
+}
+@keyframes fadeIn { from { opacity:0; transform:translateY(6px) } to { opacity:1; transform:translateY(0) } }
+@keyframes shimmer { 0% { background-position:-200% center } 100% { background-position:200% center } }
+@keyframes sparkPop { 0% { transform:scale(1) } 50% { transform:scale(1.2) } 100% { transform:scale(1) } }
+@keyframes floatStar { 0%,100% { opacity:.2; transform:translateY(0) } 50% { opacity:.6; transform:translateY(-5px) } }
+@keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.5} }
+@keyframes savedPop { 0%{opacity:0;transform:translateY(4px)} 20%{opacity:1;transform:translateY(0)} 80%{opacity:1} 100%{opacity:0} }
+
+input, textarea, select { font-family: 'Raleway', sans-serif; -webkit-appearance: none; }
+button { -webkit-appearance:none; border:none; cursor:pointer; font-family:'Raleway',sans-serif; }
+::-webkit-scrollbar { width:4px } ::-webkit-scrollbar-track { background:transparent } ::-webkit-scrollbar-thumb { background:var(--dimmer); border-radius:2px }
+
+.stars { position:fixed; inset:0; pointer-events:none; z-index:0; overflow:hidden }
+.star { position:absolute; width:2px; height:2px; border-radius:50%; background:var(--purple); opacity:.2; animation:floatStar 4s ease-in-out infinite }
+
+.app { max-width:460px; margin:0 auto; padding:18px 14px 110px; position:relative; z-index:1 }
+
+/* Header */
+.hdr { text-align:center; margin-bottom:18; animation:fadeIn .5s ease }
+.hdr-icon { font-size:28px; margin-bottom:2px }
+.hdr-title { font-family:'Cinzel',serif; font-size:19px; font-weight:700; letter-spacing:3px; text-transform:uppercase;
+  background:linear-gradient(90deg,var(--purple),var(--accent),var(--purple)); background-size:200% auto;
+  animation:shimmer 4s linear infinite; -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text; margin-bottom:3px }
+.hdr-sub { font-size:10px; letter-spacing:1.5px; color:var(--dim); text-transform:uppercase; font-weight:300 }
+.save-ind { display:block; margin-top:4px; font-size:10px; letter-spacing:1px; animation:savedPop 2s ease forwards }
+
+/* Stats */
+.stats { display:flex; gap:6px; margin-bottom:14px }
+.stat { flex:1; text-align:center; padding:10px 4px; background:var(--purpleA); border-radius:11px; border:1px solid var(--border) }
+.stat-ic { font-size:17px }
+.stat-n { font-family:'Cinzel',serif; font-size:19px; font-weight:700; color:var(--accent); line-height:1.2 }
+.stat-l { font-size:8px; letter-spacing:1.5px; color:var(--dim); text-transform:uppercase; font-weight:500 }
+
+/* Tabs */
+.tabs { display:flex; gap:3px; margin-bottom:14px; padding:3px; background:rgba(15,10,30,.5); border-radius:10px; border:1px solid var(--border) }
+.tab { flex:1; padding:8px 4px; border-radius:8px; font-size:12px; font-weight:500; letter-spacing:.3px; background:transparent; color:var(--dim); transition:all .2s }
+.tab.on { background:rgba(139,92,246,.2); color:var(--text) }
+
+/* Section fade */
+.sec { animation:fadeIn .3s ease }
+
+/* Date nav */
+.dnav { display:flex; align-items:center; justify-content:space-between; margin-bottom:12px; padding:9px 12px; background:var(--purpleA); border-radius:11px; border:1px solid var(--border) }
+.dnav-btn { background:none; border:none; color:var(--purple); font-size:22px; padding:4px 10px }
+.dnav-date { font-family:'Cinzel',serif; font-size:13px; font-weight:600; text-align:center }
+.dnav-type { font-size:11px; font-weight:500; margin-top:1px; text-align:center }
+
+/* Cards */
+.card { padding:16px; margin-bottom:12px; border-radius:13px }
+.w-name { font-family:'Cinzel',serif; font-size:16px; font-weight:600 }
+.w-desc { font-size:11px; color:var(--dim); font-weight:300; margin-top:2px }
+.done-btn { width:50px; height:50px; border-radius:50%; font-size:21px; display:flex; align-items:center; justify-content:center; transition:all .3s; flex-shrink:0 }
+.done-btn.on { background:linear-gradient(135deg,#fbbf24,#f59e0b); color:var(--bg); box-shadow:0 0 16px rgba(251,191,36,.25) }
+.done-btn.off { background:rgba(139,92,246,.1); color:var(--dim) }
+
+/* Strength */
+.sg-label { font-size:9px; font-weight:600; letter-spacing:2px; text-transform:uppercase; color:#e11d48; margin-bottom:5px; padding-bottom:3px; border-bottom:1px solid rgba(225,29,72,.1) }
+.sg-item { display:flex; align-items:center; gap:8px; width:100%; padding:6px 9px; margin-bottom:2px; border-radius:7px; text-align:left; color:var(--text); transition:all .15s; background:rgba(255,255,255,.015); border:1px solid rgba(139,92,246,.06) }
+.sg-item.ck { background:rgba(251,191,36,.06); border-color:rgba(251,191,36,.16) }
+.sg-ck { width:17px; height:17px; border-radius:3px; display:flex; align-items:center; justify-content:center; font-size:10px; flex-shrink:0 }
+.sg-ck.on { background:#fbbf24; color:var(--bg) } .sg-ck.off { background:rgba(139,92,246,.12); color:var(--dim) }
+
+/* Inputs */
+.irow { display:flex; gap:8px; margin-top:12px }
+.ilbl { font-size:9px; letter-spacing:1.5px; color:var(--dim); text-transform:uppercase; font-weight:500; display:block; margin-bottom:3px }
+.itxt { width:100%; padding:8px 10px; border-radius:9px; background:var(--input-bg); border:1px solid rgba(139,92,246,.12); color:var(--text); font-size:13px; outline:none }
+.itxt:focus { border-color:rgba(139,92,246,.3) }
+
+/* Mood */
+.mood-card { padding:16px; margin-bottom:12px; border-radius:13px; background:var(--purpleA); border:1px solid var(--border) }
+.mood-lbl { font-size:9px; letter-spacing:1.5px; color:var(--dim); text-transform:uppercase; font-weight:500; margin-bottom:6px }
+.mood-grid { display:flex; flex-wrap:wrap; gap:4px }
+.mood { padding:4px 10px; border-radius:16px; font-size:11px; font-weight:400; transition:all .15s; background:rgba(15,10,30,.35); color:var(--dim); border:1px solid rgba(139,92,246,.08) }
+.mood.on { background:rgba(251,191,36,.12); color:var(--accent); border-color:rgba(251,191,36,.25) }
+
+/* Pride */
+.pride { padding:16px; border-radius:13px; background:rgba(251,191,36,.02); border:1px solid rgba(251,191,36,.07); margin-bottom:12px }
+.pride-lbl { font-family:'Cinzel',serif; font-size:12px; font-weight:600; color:var(--accent); display:block; margin-bottom:6px }
+.notes-lbl { font-size:9px; letter-spacing:1.5px; color:var(--dim); text-transform:uppercase; font-weight:500; display:block; margin-bottom:4px; margin-top:12px }
+.notes-area { width:100%; padding:9px 11px; border-radius:9px; background:var(--input-bg); border:1px solid var(--border); color:var(--text); font-size:13px; outline:none; resize:vertical; line-height:1.5; min-height:60px }
+
+/* Desk */
+.desk-hdr { text-align:center; margin-bottom:14px; font-family:'Cinzel',serif; font-size:14px; color:var(--purple) }
+.desk-sub { font-size:11px; color:var(--dim); text-align:center; margin-bottom:14px; font-weight:300 }
+.desk-list { display:flex; flex-direction:column; gap:7px }
+.desk-item { display:flex; align-items:center; gap:11px; padding:13px 14px; border-radius:12px; text-align:left; transition:all .15s; background:rgba(15,10,30,.25); border:1px solid rgba(139,92,246,.06) }
+.desk-item.has { background:rgba(139,92,246,.06); border-color:rgba(139,92,246,.16) }
+.desk-item.pop { animation:sparkPop .4s ease }
+.desk-ic { width:38px; height:38px; border-radius:9px; display:flex; align-items:center; justify-content:center; font-size:19px; flex-shrink:0; background:rgba(139,92,246,.04) }
+.desk-item.has .desk-ic { background:linear-gradient(135deg,rgba(251,191,36,.12),rgba(139,92,246,.12)) }
+.desk-nm { font-size:13px; font-weight:500; color:var(--text) }
+.desk-tgt { font-size:10px; color:var(--dim); font-weight:300; margin-top:1px }
+.desk-ct { min-width:32px; height:32px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-family:'Cinzel',serif; font-size:14px; font-weight:700; color:var(--dimmer); background:rgba(139,92,246,.03); border:1px solid rgba(139,92,246,.08) }
+.desk-ct.pos { color:var(--accent); background:rgba(251,191,36,.07); border-color:rgba(251,191,36,.16) }
+.desk-tip { margin-top:16px; padding:12px; border-radius:10px; background:rgba(251,191,36,.02); border:1px solid rgba(251,191,36,.05); text-align:center; font-size:10px; color:var(--dim); font-weight:300; line-height:1.6 }
+
+/* Week */
+.wk-title { text-align:center; margin-bottom:14px; font-family:'Cinzel',serif; font-size:14px; color:var(--purple) }
+.wk-list { display:flex; flex-direction:column; gap:6px }
+.wk-item { display:flex; align-items:center; gap:9px; padding:11px 12px; border-radius:10px; text-align:left; transition:all .15s; background:rgba(15,10,30,.15); border:1px solid rgba(139,92,246,.04) }
+.wk-item.today { background:rgba(139,92,246,.08); border-color:rgba(139,92,246,.2) }
+.wk-ic { width:36px; height:36px; border-radius:8px; display:flex; align-items:center; justify-content:center; font-size:17px; flex-shrink:0 }
+.wk-date { font-size:12px; font-weight:500 }
+.wk-type { font-size:10px; font-weight:400; margin-top:1px }
+.wk-sum { margin-top:16px; padding:14px; border-radius:12px; background:var(--purpleA); border:1px solid var(--border) }
+.wk-sum-t { font-family:'Cinzel',serif; font-size:10px; font-weight:600; color:var(--purple); letter-spacing:1px; margin-bottom:7px; text-transform:uppercase }
+.pbar { height:5px; border-radius:3px; background:rgba(15,10,30,.45); overflow:hidden; margin-top:6px }
+.pfill { height:100%; border-radius:3px; background:linear-gradient(90deg,#8b5cf6,#fbbf24); transition:width .4s ease }
+
+/* Data management */
+.data-section { margin-top:30px; padding:16px; border-radius:12px; background:rgba(139,92,246,.03); border:1px solid var(--border) }
+.data-title { font-family:'Cinzel',serif; font-size:11px; color:var(--purple); letter-spacing:1px; margin-bottom:10px; text-transform:uppercase }
+.data-btn { padding:8px 16px; border-radius:8px; font-size:11px; letter-spacing:.5px; font-weight:500; margin-right:6px; margin-bottom:6px; transition:all .2s }
+.data-btn.export { background:rgba(139,92,246,.1); color:var(--purple); border:1px solid rgba(139,92,246,.2) }
+.data-btn.import { background:rgba(251,191,36,.08); color:var(--accent); border:1px solid rgba(251,191,36,.15) }
+.data-btn.reset { background:rgba(248,113,113,.05); color:#f87171; border:1px solid rgba(248,113,113,.12) }
+</style>
+</head>
+<body>
+
+<div class="stars" id="stars"></div>
+<div class="app" id="app"></div>
+
+<script>
+// === CONFIG ===
+const DAYS=["Sunday","Monday","Tuesday","Wednesday","Thursday","Friday","Saturday"];
+const SCHED={Monday:{type:"Rowing",icon:"🚣",desc:"15 min rowing (increase 2 min/week)",color:"#8b5cf6"},Tuesday:{type:"Trail",icon:"🌲",desc:"Ocean trail walk + circuit at halfway",color:"#059669"},Wednesday:{type:"Strength",icon:"💪",desc:"Resistance bands — upper, lower, core",color:"#e11d48"},Thursday:{type:"Yoga",icon:"🧘",desc:"Flexibility & nervous system work",color:"#0ea5e9"},Friday:{type:"Sprints",icon:"⚡",desc:"20 min intervals. Go hard. Rest. Repeat.",color:"#f59e0b"},Saturday:{type:"Play",icon:"✨",desc:"Whatever feels fun. Dance. Hike. Swim.",color:"#a855f7"},Sunday:{type:"Rest",icon:"🌙",desc:"Stretch. Foam roll. Recover.",color:"#64748b"}};
+const DESK=[{id:"vacuum",name:"Stomach Vacuums",target:"5 reps",icon:"🌀",note:"The waist cincher"},{id:"squats",name:"Squats",target:"20 reps",icon:"🦵",note:"Dance floor prep"},{id:"sideleglifts",name:"Side Leg Lifts",target:"20 each",icon:"🦿",note:"Hip stabilizers"},{id:"backleglifts",name:"Back Leg Lifts",target:"20 each",icon:"🍑",note:"Glute power"},{id:"kegels",name:"Kegels",target:"20 reps",icon:"🔮",note:"Nobody knows 😏"},{id:"oblique",name:"Oblique Crunches",target:"10 each side",icon:"🌊",note:"Side waist cinch"},{id:"twists",name:"Standing Twists",target:"20 total",icon:"💫",note:""},{id:"curls",name:"Water Bottle Curls",target:"20 each arm",icon:"💪",note:"Stealth arm day"},{id:"calfraises",name:"Calf Raises",target:"20 reps",icon:"🩰",note:"Dance floor bounce"},{id:"shouldersq",name:"Shoulder Squeezes",target:"10 reps",icon:"👑",note:"Posture queen"}];
+const MOODS=[{e:"😤",l:"Powerful"},{e:"✨",l:"Magnetic"},{e:"🌊",l:"Flowing"},{e:"🔥",l:"On Fire"},{e:"🌸",l:"Soft"},{e:"😴",l:"Tired"},{e:"😰",l:"Anxious"},{e:"💪",l:"Strong"}];
+const STR={upper:[{id:"ohp",n:"Overhead Press",s:"3×12"},{id:"rows",n:"Bent Over Rows",s:"3×12"},{id:"curls_s",n:"Bicep Curls",s:"3×15"},{id:"chest",n:"Chest Press",s:"3×12"}],lower:[{id:"squats_s",n:"Squats",s:"3×15"},{id:"bridges",n:"Glute Bridges (3s hold 😏)",s:"3×15"},{id:"lateral",n:"Lateral Band Walks",s:"3×10 ea"},{id:"hydrant",n:"Fire Hydrants",s:"3×12 ea"},{id:"clam",n:"Clamshells",s:"3×15 ea"}],core:[{id:"plank",n:"Plank",s:"3 rounds max"},{id:"deadbug",n:"Dead Bugs",s:"3×10"}]};
+
+// === STATE ===
+let data={entries:{},desk:{}};
+let sel=new Date(), tab="today";
+
+function dk(d){return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`}
+function dn(d){return DAYS[d.getDay()]}
+function fmt(d){return d.toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric'})}
+function empty(){return{completed:false,moodBefore:"",moodAfter:"",proud:"",notes:"",strengthChecks:{},heartRate:"",duration:""}}
+function getE(k){return data.entries[k]||empty()}
+
+// === STORAGE ===
+function load(){try{const d=localStorage.getItem('cott_data');if(d)data=JSON.parse(d)}catch(e){}}
+function save(){try{localStorage.setItem('cott_data',JSON.stringify(data));showSave(true)}catch(e){showSave(false)}}
+let saveTO=null;
+function showSave(ok){
+  const el=document.getElementById('save-ind');
+  if(!el)return;
+  el.textContent=ok?'✓ saved':'⚠ save failed';
+  el.style.color=ok?'#4ade80':'#f87171';
+  el.style.animation='none';el.offsetHeight;el.style.animation='savedPop 2s ease forwards';
+}
+
+function upd(k,u){const e=getE(k);data.entries[k]={...e,...u};save();render()}
+function deskTap(id){const k=dk(sel),d=data.desk[k]||{};d[id]=(d[id]||0)+1;data.desk[k]=d;save();render();
+  setTimeout(()=>{const el=document.getElementById('d-'+id);if(el){el.classList.add('pop');setTimeout(()=>el.classList.remove('pop'),400)}},10)}
+function strTog(id){const k=dk(sel),e=getE(k),c={...(e.strengthChecks||{}),[id]:!e.strengthChecks?.[id]};upd(k,{strengthChecks:c})}
+function nav(o){sel=new Date(sel);sel.setDate(sel.getDate()+o);render()}
+function goDay(iso){sel=new Date(iso+'T12:00:00');tab='today';render()}
+function setTab(t){tab=t;render()}
+
+// === STATS ===
+function stats(){
+  const totalW=Object.values(data.entries).filter(e=>e.completed).length;
+  let streak=0,d=new Date();
+  for(let i=0;i<90;i++){const k=dk(d),n=dn(d);if(n==="Sunday"){d.setDate(d.getDate()-1);continue}if(data.entries[k]?.completed){streak++;d.setDate(d.getDate()-1)}else break}
+  const totalD=Object.values(data.desk).reduce((s,dy)=>s+Object.values(dy).reduce((a,v)=>a+v,0),0);
+  return{totalW,streak,totalD}
+}
+function weekDays(){const t=new Date(),s=new Date(t);s.setDate(t.getDate()-t.getDay());return Array.from({length:7},(_,i)=>{const d=new Date(s);d.setDate(s.getDate()+i);return d})}
+
+// === DATA MANAGEMENT ===
+function exportData(){
+  const blob=new Blob([JSON.stringify(data,null,2)],{type:'application/json'});
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement('a');a.href=url;a.download='captain-backup-'+dk(new Date())+'.json';a.click();
+  URL.revokeObjectURL(url);
+}
+function importData(){
+  const input=document.createElement('input');input.type='file';input.accept='.json';
+  input.onchange=e=>{const f=e.target.files[0];if(!f)return;const r=new FileReader();
+    r.onload=ev=>{try{data=JSON.parse(ev.target.result);save();render();alert('Data imported!')}catch(e){alert('Invalid file')}};
+    r.readAsText(f)};
+  input.click();
+}
+function resetData(){if(confirm('Clear ALL workout data? This cannot be undone.')){data={entries:{},desk:{}};save();render()}}
+
+// === RENDER ===
+function render(){
+  const k=dk(sel),day=dn(sel),sc=SCHED[day],e=getE(k),dd=data.desk[k]||{},st=stats();
+  const today=dk(new Date());
+  let h='';
+
+  // Header
+  h+=`<div class="hdr"><div class="hdr-icon">🏋🏼‍♀️</div><h1 class="hdr-title">Captain of the Throwers</h1>
+  <p class="hdr-sub">No weight · No measurements · Just how you feel</p><span id="save-ind" class="save-ind"></span></div>`;
+
+  // Stats
+  h+=`<div class="stats">${[{n:st.totalW,l:'Workouts',i:'🏆'},{n:st.streak,l:'Streak',i:'🔥'},{n:st.totalD,l:'Desk Sets',i:'💼'}].map(s=>`<div class="stat"><div class="stat-ic">${s.i}</div><div class="stat-n">${s.n}</div><div class="stat-l">${s.l}</div></div>`).join('')}</div>`;
+
+  // Tabs
+  h+=`<div class="tabs">${[{id:'today',l:'Today',i:'☀️'},{id:'desk',l:'Desk',i:'💼'},{id:'week',l:'Week',i:'📅'}].map(t=>`<button class="tab${tab===t.id?' on':''}" onclick="setTab('${t.id}')">${t.i} ${t.l}</button>`).join('')}</div>`;
+
+  // === TODAY ===
+  if(tab==='today'){
+    h+=`<div class="sec">`;
+    h+=`<div class="dnav"><button class="dnav-btn" onclick="nav(-1)">‹</button><div><div class="dnav-date">${fmt(sel)}</div><div class="dnav-type" style="color:${sc.color}">${sc.icon} ${sc.type} Day</div></div><button class="dnav-btn" onclick="nav(1)">›</button></div>`;
+
+    h+=`<div class="card" style="background:linear-gradient(135deg,${sc.color}12,${sc.color}06);border:1px solid ${sc.color}28">`;
+    h+=`<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px"><div><div style="font-size:24px;margin-bottom:2px">${sc.icon}</div><div class="w-name">${sc.type}</div><div class="w-desc">${sc.desc}</div></div>`;
+    h+=`<button class="done-btn ${e.completed?'on':'off'}" onclick="upd('${k}',{completed:${!e.completed}})">${e.completed?'✓':'○'}</button></div>`;
+
+    // Wednesday strength
+    if(day==='Wednesday'){
+      h+=`<div style="margin-top:8px">`;
+      for(const[g,exs]of Object.entries(STR)){
+        h+=`<div style="margin-bottom:8px"><div class="sg-label">${g}</div>`;
+        for(const ex of exs){const ck=e.strengthChecks?.[ex.id];
+          h+=`<button class="sg-item${ck?' ck':''}" onclick="strTog('${ex.id}')"><span class="sg-ck ${ck?'on':'off'}">${ck?'✓':''}</span><span style="font-size:12px;flex:1">${ex.n}</span><span style="font-size:10px;color:var(--dim)">${ex.s}</span></button>`}
+        h+=`</div>`}
+      h+=`</div>`}
+
+    // HR + Duration
+    h+=`<div class="irow"><div style="flex:1"><label class="ilbl">Heart Rate</label><input class="itxt" type="text" placeholder="e.g. 128 bpm" value="${e.heartRate}" onchange="upd('${k}',{heartRate:this.value})"></div><div style="flex:1"><label class="ilbl">Duration</label><input class="itxt" type="text" placeholder="e.g. 45 min" value="${e.duration}" onchange="upd('${k}',{duration:this.value})"></div></div>`;
+    h+=`</div>`;
+
+    // Mood
+    h+=`<div class="mood-card">`;
+    for(const w of['Before','After']){const f=w==='Before'?'moodBefore':'moodAfter';
+      h+=`<div style="margin-bottom:${w==='Before'?'12px':'0'}"><div class="mood-lbl">Mood ${w}</div><div class="mood-grid">`;
+      for(const m of MOODS){const a=e[f]===m.l;h+=`<button class="mood${a?' on':''}" onclick="upd('${k}',{'${f}':'${m.l}'})">${m.e} ${m.l}</button>`}
+      h+=`</div></div>`}
+    h+=`</div>`;
+
+    // Pride + Notes
+    h+=`<div class="pride"><label class="pride-lbl">✨ One Thing I'm Proud Of Today</label><input class="itxt" style="border-color:rgba(251,191,36,.1)" type="text" placeholder="About YOU." value="${(e.proud||'').replace(/"/g,'&quot;')}" onchange="upd('${k}',{proud:this.value})">`;
+    h+=`<label class="notes-lbl">Notes</label><textarea class="notes-area" placeholder="How did it feel? What worked?" onchange="upd('${k}',{notes:this.value})">${e.notes||''}</textarea></div>`;
+    h+=`</div>`;
+  }
+
+  // === DESK ===
+  if(tab==='desk'){
+    h+=`<div class="sec"><div class="desk-hdr">Stealth Mode Activated 🕵️‍♀️</div><div class="desk-sub">Tap to count a set. Nobody will ever know.</div><div class="desk-list">`;
+    for(const ex of DESK){const ct=dd[ex.id]||0;
+      h+=`<button id="d-${ex.id}" class="desk-item${ct>0?' has':''}" onclick="deskTap('${ex.id}')"><div class="desk-ic">${ex.icon}</div><div style="flex:1"><div class="desk-nm">${ex.name}</div><div class="desk-tgt">${ex.target}${ex.note?' · '+ex.note:''}</div></div><div class="desk-ct${ct>0?' pos':''}">${ct}</div></button>`}
+    h+=`</div><div class="desk-tip">The stomach vacuums are the secret weapon. 🌀<br>That transverse abdominis is a literal corset muscle.</div></div>`;
+  }
+
+  // === WEEK ===
+  if(tab==='week'){
+    const wd=weekDays();let done=0,total=0;
+    h+=`<div class="sec"><div class="wk-title">This Week</div><div class="wk-list">`;
+    for(const d of wd){const wk=dk(d),n=dn(d),s=SCHED[n],we=data.entries[wk],isT=wk===today,ds=data.desk[wk]?Object.values(data.desk[wk]).reduce((a,v)=>a+v,0):0;
+      if(n!=='Sunday')total++;if(we?.completed)done++;
+      h+=`<button class="wk-item${isT?' today':''}" onclick="goDay('${wk}')"><div class="wk-ic" style="background:${we?.completed?'linear-gradient(135deg,rgba(251,191,36,.2),rgba(251,191,36,.08))':s.color+'10'}">${we?.completed?'✓':s.icon}</div><div style="flex:1"><div class="wk-date" style="color:${isT?'var(--accent)':'var(--text)'}">${d.toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric'})}${isT?' · today':''}</div><div class="wk-type" style="color:${s.color}">${s.icon} ${s.type}</div></div><div style="text-align:right">${we?.completed?'<div style="font-size:10px;color:var(--accent)">Done ✨</div>':''}${we?.moodAfter?'<div style="font-size:9px;color:var(--dim)">Felt: '+we.moodAfter+'</div>':''}${ds>0?'<div style="font-size:9px;color:var(--dim)">💼 '+ds+' sets</div>':''}</div></button>`}
+    h+=`</div>`;
+    const pct=total>0?Math.round(done/total*100):0;
+    h+=`<div class="wk-sum"><div class="wk-sum-t">Week Summary</div><div style="font-size:12px;font-weight:300"><span style="color:var(--accent);font-weight:500">${done}/${total}</span> workouts completed</div><div class="pbar"><div class="pfill" style="width:${pct}%"></div></div>${done===total&&done>0?'<div style="margin-top:8px;font-size:11px;color:var(--accent);text-align:center">The captain showed up every day this week. 👑</div>':''}</div>`;
+    h+=`</div>`;
+  }
+
+  // Data management
+  h+=`<div class="data-section"><div class="data-title">Your Data</div><button class="data-btn export" onclick="exportData()">📤 Export Backup</button><button class="data-btn import" onclick="importData()">📥 Import Backup</button><button class="data-btn reset" onclick="resetData()">🗑 Reset All</button></div>`;
+
+  document.getElementById('app').innerHTML=h;
+}
+
+// === STARS ===
+function initStars(){const c=document.getElementById('stars');for(let i=0;i<20;i++){const s=document.createElement('div');s.className='star';s.style.top=((i*37+13)%100)+'%';s.style.left=((i*53+7)%100)+'%';s.style.animationDuration=(3+i%4)+'s';s.style.animationDelay=(i*.3)+'s';c.appendChild(s)}}
+
+// === INIT ===
+load();
+initStars();
+render();
+</script>
+</body>
+</html>
